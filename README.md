@@ -4,7 +4,11 @@
 
 2. [Linux Distribution](#distribution)
 
-3. 
+3. [Kernel Architecture](#kernel)
+
+4. [Filesystem](#filesystem)
+
+5. 
 <a name="overview"></a>
 ## 1. Overview
 
@@ -58,5 +62,75 @@ Linux distributions usually go through these cycles:
 **GitLab:** A platform that facilitates collaboration on Linux-related projects. For example, Kali Linux uses GitLab to attract community contributions and streamline its development process.
 
 **Ratomir Repository**: This site discusses how the open-source developer community contributes to Linux and UNIX systems, emphasizing collaborative coding and bug fixing.
+
+<a name="kernel"></a>
+## 3. Kernel Architecture
+
+The Linux kernel is the core of the OS, responsible for managing system resource and communication between system hardware and software.
+
+### The structure of Kernel
+
+**Process Management:** Handles process creation, scheduling, and termination.
+
+**Memory Management:** Manages RAM and virtual memory.
+
+**Device Drivers:** Interfaces with hardware devices like disks, network cards, and peripherals.
+
+**File System:** Manages data storage and retrieval using file systems like ext4 or xfs.
+
+**Networking:** Provides support for network communication.
+
+**System Call Interface:** Acts as the bridge between user applications and the kernel.
+
+### Linux boot process
+
+**BIOS/UEFI:** The system firmware initializes hardware and loads the bootloader.
+
+**Bootloader:** Loads the kernel into memory and passes control to it.
+
+**Kernel Initialization:** The kernel sets up low-level hardware, mounts the root file system, and starts the first process.
+
+**INIT/Systemd Process:** Initializes user space and starts services based on the runlevel or target.
+
+### The INIT system defines different levels for system operation
+
+0: System halt.
+
+1: Single-user mode (maintenance).
+
+2: Multi-user mode without networking.
+
+3: Full multi-user mode with networking.
+
+4: Undefined, user-configurable.
+
+5: Multi-user mode with a graphical interface.
+
+6: System reboot.
+
+<a name="filesystem"></a>
+## 4. Filesystem
+
+Filesystem is used to manage and organize stored data on the system, allowing users for quick access securely
+
+### Filesystems supported by Linux
+
+**Basic filesystem:** EXT2, EXT3, EXT4, XFS, Btrfs, JFS, NTFS,…
+
+**Filesystem for Flash storage:** memory card,…
+
+**Special purpose filesystem:** procfs, sysfs, tmpfs, squashfs, debugfs,…
+
+Basic filesystems are versatile, general-purpose filesystems like EXT4 and XFS are widely used for desktops and servers.
+
+Flash storage focused on wear-leveling and performance optimization, ideal for SSDs and embedded systems.
+
+Special purposes serve specific roles like debugging (``debugfs``), temporary storage (``tmpfs``), or virtual interfaces (``procfs``).
+
+### Linux File Hierarchy Structure
+
+1. ``/``Root
+- The top level directory containing all files
+2.  
 
 
