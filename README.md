@@ -129,8 +129,50 @@ Special purposes serve specific roles like debugging (``debugfs``), temporary st
 
 ### Linux File Hierarchy Structure
 
-1. ``/``Root
+1. ``/``Root:
+
 - The top level directory containing all files
-2.  
 
+2. ``/bin``:
 
+- Contains essential binary programs (commands) like ``ls``,``cp``,``mv`` and  that are needed during boot and for basic system operation.
+
+3. ``/boot``:
+
+- Stores files needed for booting the system, such as the kernel and bootloader configurations.
+
+4. ``/dev``:
+
+- Contains device files that represent hardware devices
+
+5. ``/etc``:
+
+- Houses configuration files for the system and applications.
+ 
+6. ``/home``
+
+- Contains personal directories for users.
+
+7. ``/lib``:
+
+- Contains personal directories for users.
+
+8. ``/media`` and ``/mnt``:
+
+- Used for mounting external storage devices like USB drives or CDs.
+
+9. ``/proc``:
+
+- A virtual filesystem providing information about running processes and system hardware.
+
+10. ``/usr``:
+
+- Contains user-installed programs and libraries.
+
+11. ``/var``:
+
+- Stores variable files such as logs (``/var/log``), cached data, and spooled files
+
+12. ``tmp``:
+
+- Temporary files created by the system or users.
