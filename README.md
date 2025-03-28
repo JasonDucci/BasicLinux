@@ -12,7 +12,9 @@
 
 6. [man (manual) commands](#man)
 
-7. 
+7. [Commands working with files](#filecmd)
+
+8. [Linux users](#user)
 <a name="overview"></a>
 ## 1. Overview
 
@@ -216,12 +218,151 @@ Starts from the root directory (``/``) then after that there is relative to the 
 
    ``cd ~`` (moves to home directory)
 
-2.  ``pwd`` (Print Working Directory): Displays your current location in the directory structure. Which outputs ``/home/user/doc`` while you are inside ``doc`` directory
+2.  ``pwd`` (Print Working Directory): Displays your current location in the directory structure. Which outputs ``/home/user/doc`` while you are inside ``doc`` directory.
 
 3.  ``ls`` (List Files): Lists the files and directories in your current location.
 
 <a name="man"></a>
 ## 6. man (manual) commands
 
-``man`` command in Linux is used to display the user manual of any command that we can run on the terminal. It provides a detailed view of the command
+``man`` command in Linux is used to display the user manual of any command that we can run on the terminal. It provides a detailed view of the command.
+
+Example: ``man ls`` displays the manual for the ``ls`` command.
+
+To navigate through the list of command use arrow keys to scroll up and down, or use ``/`` to enter keyword. Once done press ``q`` to quit the man command.
+
+<a name="filecmd"></a>
+## 7. Commands working with files
+
+### Reading files
+
+``cat``: Displays the contents of a file
+
+```sh 
+cat file.txt
+```
+
+``less``: Lets you view file contents one screen at a time (better for large files).
+
+```sh
+less file.txt
+```
+
+``tail``: Displays the last few lines of a file (default: 10 lines).
+
+```sh
+tail file.txt
+```
+
+``head``: Displays the first few lines of a file (default: 10 lines).
+
+```sh
+head file.txt
+```
+
+### Writing file
+
+``echo``: Write text to the file
+
+```sh
+echo "Hello, world" > file.txt
+```
+
+Use ``>>``to append instead of overwriting
+
+``nano``: Text editors to create and edit files directly in the terminal.
+
+```sh
+nano file.txt
+```
+
+``touch``: Creates ane empty file
+
+```sh
+touch file.txt
+```
+
+### Copy and move files
+
+``cp``: Copies files
+
+```sh
+cp source.txt destination.txt
+```
+
+``mv``: Moves or rename files
+
+```sh
+mv oldname.txt newname.txt
+```
+
+``rm``: Removes files
+
+```sh
+rm filename.txt
+```
+
+``grep``: Searches for a specific text pattern in a file.
+
+```sh
+grep "pattern" filename.txt
+```
+
+``file``: Identifies the file type.
+
+```sh
+file filename.txt
+```
+
+``stat``: Displays detailed information about a file
+
+```sh
+stat filename.txt
+```
+
+``ls -l``: Lists files with detailed information, including permissions.
+
+<a name="user"></a>
+## 8. Linux users
+
+### User groups
+Linux user groups are a way to manage permissions and access control for multiple users on a system. They allow users to share access to files, directories, and system resources based on group membership.
+
+Primary Groups: Each user has one primary group, which is usually the same as their username. Files created by the user are associated with this group by default.
+
+Secondary Groups: Users can belong to additional groups, granting them access to other resources or privileges.
+
+### User types
+
+**Root User:** The most powerful user with unrestricted access to the system. Can perform administrative tasks like installing software, managing users, and modifying system files. Should be used cautiously to avoid accidental system damage.
+
+**Regular Users:** These are standard accounts created for everyday use. Have limited access to system resources but can use ``sudo `` to temporarily gain administrative privileges. Typically have their own home directories under ``/home``.
+
+**System Users:** Created by the operating system during installation. Used for running system services and processes (e.g., ``www-data`` for web servers). Do not have login privileges and operate with restricted permissions.
+
+**Service Accounts:** Similar to system users but specifically tied to applications or services. Used for managing tasks like database operations or web hosting.
+
+### User rights and permissions
+
+Linux uses a permission model to control access:
+
+- Read (r): Allows viewing the contents of files or directories.
+
+- Write (w): Enables modifying files or adding content to directories.
+
+- Execute (x): Permits running executable files or accessing directories.
+
+Permissions are assigned to three categories:
+
+- Owner: The user who owns the file or directory.
+
+- Group: A set of users who share access.
+
+- Others: All other users on the system.
+
+
+
+
+
+
 
