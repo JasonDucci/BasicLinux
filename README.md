@@ -8,7 +8,11 @@
 
 4. [Filesystem](#filesystem)
 
-5. 
+5. [Linux tree structure of directory](#treedir)
+
+6. [man (manual) commands](#man)
+
+7. 
 <a name="overview"></a>
 ## 1. Overview
 
@@ -176,3 +180,48 @@ Special purposes serve specific roles like debugging (``debugfs``), temporary st
 12. ``tmp``:
 
 - Temporary files created by the system or users.
+
+<a name="treedir"></a>
+## 5. Linux tree structure of directory
+
+The Linux directory tree is the hierarchical structure of directories and files in a Linux file system. It starts from the root directory (``/``) and branches out into various subdirectories, representing the organization of files and directories on the system.
+
+Directories are containers used to organize files and other directories. Represented as ``d`` in permissions (like ``drwxr-xr-v``).
+
+Sockets are special files used for interprocess communication (IPC). Allow processes to exchange data, often over a network or locally.
+
+Other File Types:
+
+- Regular Files: Most files in the system, like text or binary files.
+
+- Symbolic Links: Shortcuts that point to other files or directories.
+
+- Pipes: Temporary connections between commands, often used in scripting.
+
+- Character/Block Devices: Represent hardware devices
+
+### Path concept 
+
+Paths help specify the location of a file or directory.
+
+Starts from the root directory (``/``) then after that there is relative to the current working directory. Example: ``/home/user/doc``
+
+### Basic directory commands
+
+1. ``cd``: change directory
+
+   ``cd home/user`` (Moves to "user" directory)
+
+   ``cd ..`` (moves up to one directory)
+
+   ``cd ~`` (moves to home directory)
+
+2.  ``pwd`` (Print Working Directory): Displays your current location in the directory structure. Which outputs ``/home/user/doc`` while you are inside ``doc`` directory
+
+3.  ``ls`` (List Files): Lists the files and directories in your current location.
+
+<a name="man"></a>
+## 6. man (manual) commands
+
+``man`` command in Linux is used to display the user manual of any command that we can run on the terminal. It provides a detailed view of the command
+
