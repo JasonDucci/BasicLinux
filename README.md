@@ -15,6 +15,22 @@
 7. [Commands working with files](#filecmd)
 
 8. [Linux users](#user)
+
+9. [Package Manager](#package)
+
+10. [Processes](#process)
+
+11. [Virtual RAM and SWAP](#RAM)
+
+12. [Network configuration](#Network)
+
+13. [Command types](#commands)
+
+14. [Sudo and su](#sudo)
+
+15. [File commands](#filecmd)
+
+16. [Environment Variables](#var)
 <a name="overview"></a>
 ## 1. Overview
 
@@ -222,6 +238,30 @@ Starts from the root directory (``/``) then after that there is relative to the 
 
 3.  ``ls`` (List Files): Lists the files and directories in your current location.
 
+### Symbolic links of linux
+
+Field	Meaning
+
+``lrwxrwxrwx  1 root root   16 Jan 10 11:56 99-environment.conf -> /etc/environment``
+
+``l``	First character: indicates it's a symbolic link (l = link)
+
+``rwxrwxrwx``	Permissions: link has full permissions (not meaningful for symlinks)
+
+``1``	Link count (for symlinks, usually 1)
+
+``root``	Owner of the file (root user)
+
+``root``	Group owner (root group)
+
+``16``	Size of the symlink target string (length of /etc/environment)
+
+``Jan 10 11:56``	Last modification time of the link (not the target file)
+
+``99-environment.conf``	The name of the symlink
+
+``-> /etc/environment``	The file it points to
+
 <a name="man"></a>
 ## 6. man (manual) commands
 
@@ -360,7 +400,534 @@ Permissions are assigned to three categories:
 
 - Others: All other users on the system.
 
+### File permission example
 
+``drwxrwxr-x  12 root   root  4096 Apr 10 07:27 tmp``
+
+``d``: the directory
+
+First three digits ``rwx``: Permission of the owner 
+
+Second three digits ``rxw``: Permission of the group 
+
+Last three digits ``r-x``: Permission of other users 
+
+The first ``root``: The owner name 
+
+The second ``root``: The group name
+
+``4096``: The size of the directory
+
+``Apr 10 07:27``: The last modified timestamp when a directory contents were changed
+
+``tmp``: Directory name
+
+### Giving permission for users
+
+``chown (user) (directory/file)`` giving the ownership of the directory/file to an user
+
+``chmod (u/g/o/a)(+/-/=)(r/w/x) filename`` 
+
+``(u/g/o/a)``: Giving permission to (owner/group/other/all)
+
+``(+/-/=)``: Add, remove or overwrite the last permission
+
+``(r/w/x)``: Giving permission to read/write/execute
+
+### Permission 777
+
+The permissions can be represented in three groups, with each group represented by 3 numbers:
+
+Owner: First number
+
+Group: Middle number
+
+Others: Last number
+
+When a file or directory has 777 permissions means the user/group/others has full access
+
+In numerical terms: 
+
+4 = Read (`r`)
+
+2 = Write (`w`)
+
+1 = Execute (`x`)
+
+0 = no permission
+
+4 + 2 + 1 = 7 (full access)
+
+4 + 2 = 6 (Read and write only)
+
+4 + 1 = 5 (Read and execute only)
+
+2 + 1 = 3 (Write and execute only)
+
+Giving permission is more simple with this command:
+
+``chmod 777 filename``
+
+By default, Linux assigns the permission  (full read, write, and execute access) to the ``/tmp`` directory.
+
+``/tmp``is used to store temporary files by all users and applications. Since it's globally accessible,  ensures users can create, modify, and delete temporary files as needed.
+
+The decision to represent permissions using numbers in Linux was driven by the need for simplicity, efficiency, and universality.
+
+### Advanced permissions
+
+**SUID (Set User ID):**
+
+Allows a program to run with the permissions of the file owner, rather than the user executing it. When the SUID bit is set on an executable file, it runs with the privileges of the file's owner. Represented by an ``S`` in the owner's execute position (e.g., ``-rwSr--xr-x``).
+
+Example:
+
+```sh
+chmod u+s filename
+```
+
+**SGID (Set Group ID):**
+
+Similar to SUID, it allows a program or directory to run with the permissions of the group owner.
+
+Example:
+
+```sh
+chmod g+s filename
+```
+
+**Sticky Bit:**
+
+Restricts file deletion in a directory to the file's owner, even if others have write permissions. When the sticky bit is set on a directory, users can only delete their own files, even if they have write access to the directory. Represented by a ``T`` in the others' execute position (e.g., ``drwxrwxrwT``).
+
+Example:
+
+```sh
+chmod +t directoryname
+```
+
+**Umask:**
+
+Sets default permissions for newly created files and directories by masking certain bits. The ``umask`` value subtracts permissions from the default settings. Example: Files being 666 (read and write to all)
+
+### Change user password
+
+Access ``/etc/shadow`` using ``sudo vim`` command and change the user password
+
+However, editing passwords directly in ``/etc/shadow`` is not recommended, as it can compromise security.
+
+<a name="package"></a>
+## 9. Package Managers
+
+**dpkg (Debian Package Manager):**
+
+dpkg is a core tool for managing ``.deb`` packages. It works directly with package files. You can use it to install, remove, and query ``.deb`` packages. dpkg does not automatically resolve or install dependencies. If a package requires other packages, you need to manually install them.
+
+``.deb`` packages are software packages used in Debian-based Linux distributions, including Ubuntu. They are essentially archives containing files and metadata required to install software.
+
+Example:
+
+```sh
+dpkg -i package.deb  # Install a .deb package
+dpkg -r package_name  # Remove a package
+```
+
+**apt (Advanced Package Tool):**
+
+apt is a front-end for dpkg that simplifies package management. apt automatically resolves and installs dependencies, making it more user-friendly. apt can fetch packages from remote repositories, whereas dpkg only works with local files. 
+
+Example:
+
+```sh
+apt install package_name  # Install a package and its dependencies
+apt remove package_name  # Remove a package
+apt update  # Update package lists
+apt upgrade  # Upgrade installed packages
+```
+
+dpkg is a powerful tool for manual package management, while apt provides a more streamlined and automated experience by handling dependencies and accessing repositories.
+
+**apt-get:**
+
+A lower-level tool designed for scripts and advanced users. Offers more granular control and additional options.
+
+``apt`` is simpler and more intuitive for everyday users, while ``apt-get`` is better suited for scripting and automation.
+
+``apt`` provides a more polished and readable output compared to ``apt-get``.
+
+<a name="process"></a>
+## 10. Processes
+
+A process in Linux is essentially a running instance of a program. Whenever you execute a command, open an application, or perform a task in Linux, it creates a process. Processes are fundamental to how Linux and other operating systems function.
+
+### Foreground processes
+
+These run interactively, meaning they require user input and block the terminal until they're complete.
+
+### Background processes
+
+These run in the background, allowing you to continue using the terminal.
+
+### Daemon processes
+
+These are background processes that run independently of the terminal and often handle system tasks or services.
+
+### Zombie processes
+
+These are processes that have finished executing but still occupy an entry in the process table. They are harmless but indicate that the parent process didn't properly clean them up.
+
+### Orphan Processes
+
+These are processes whose parent process has been terminated. They are adopted by the init process (PID 1).
+
+### Key commands to manage processes
+
+``ps`` lists only processes associated with the current terminal session.
+
+``kill`` Sends a signal (like terminate) to a process using its PID.
+
+``killall`` Kills all processes by name.
+
+``pkill`` Kills processes by name but adds more advanced matching capabilities.
+
+``fg`` Resumes a process in the foreground.
+
+``bg`` Resumes a paused process in the background.
+
+``sleep`` pause the execution of a script or a command for a specified amount of time.
+
+``top`` A real-time process manager that shows resource usage (CPU, memory, etc.) for each process.
+
+``htop`` An enhanced version of ``top`` with a more user-friendly interface and better features. Provides color-coded stats and supports mouse interactions.
+
+``lsof`` Display information about files that are currently open by processes.
+
+### Foreground and background
+
+<a name="RAM"></a>
+## 11. Virtual RAM and SWAP
+
+Virtual RAM, or virtual memory, is a system that allows Linux to use both physical RAM and secondary storage (like a hard disk or SSD) to create an illusion of having more memory than physically available.
+
+When a program needs memory, the kernel decides whether to keep it in RAM or move it to the disk (swap space). This technique enables running large applications even with limited physical RAM.
+
+SWAP is a designated area on the disk used as an extension of physical RAM. When the system runs out of RAM, it moves inactive pages to the SWAP space, freeing up RAM for active processes. 
+
+SWAP can be set up as a partition or a file. While SWAP helps prevent system crashes due to memory exhaustion, it is slower than RAM, so excessive reliance on SWAP can lead to performance issues.
+
+In certain situations, they can be useful due to their flexibilty enhancing system stability while running heavy tasks. However, excessive reliance on SWAP can degrade performance because disk access is much slower than RAM access. 
+
+In modern systems with ample RAM, SWAP might only be lightly used or even unnecessary for general tasks, only for servers and datasets where it really useful.
+
+<a name="Network"></a>
+## 12. Network configuration
+
+Configuring network settings on Ubuntu can be done using various methods, depending on your needs.
+
+**Netplan:** Ubuntu uses Netplan for network configuration. It allows you to define settings in YAML files. For example, you can set up static IPs or configure DHCP.
+
+**Command Line:** You can use commands like ``ip a`` to view network interfaces or ``ipconfig`` to configure them. For more advanced tasks, commands like ``sude route add`` can set up gateways.
+
+### Setting a static network
+
+Open the Netplan configuration file:
+
+```sh
+sudo nano /etc/netplan/01-netcfg.yaml
+```
+
+Add the configuration into the file:
+
+```sh
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: no
+      addresses:
+        - 192.168.1.100/24
+      gateway4: 192.168.1.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+
+```
+
+Apply the configuration:
+
+```sh
+sudo netplan apply
+```
+
+### Setting a dynamic network
+
+Change the dhcp4 to ``yes`` inside the yaml file
+
+Then use the apply command again
+
+### Add/Remove IP address
+
+```sh 
+sudo ip addr add/del 192.168.1.101/24 dev enp0s3
+```
+<a name="commands"></a>
+## 13. Command types
+
+The ``type`` command is used to identify and distinguish between different kinds of commands.
+
+### Types of commands
+
+**Built-in Commands:** Commands that are part of the shell itself (``cd``, ``echo``). These do not have an external executable file,  the shell processes them directly. Output example: ``cd is a shell builtin``
+
+**External Commands:** These are executable programs stored as files on the filesystem (e.g., ``/bin/ls``, ``/usr/bin/grep``). Output example: ``mv is /usr/bin/mv``
+
+**Aliases:** Shortcuts or custom names for commands that users define (``alias ll='ls -la'``). Output example: ``ls is aliased to `ls --color=auto'``
+
+**Functions:** User-defined functions within the shell script. Output example: ``myFunction is a funciton``
+
+**Keyword:** Special words that have specific meaning in the shell. Output example: ``if is a shell keyword``
+
+<a name="sudo"></a>
+## 14. Sudo and su
+
+The ``sudo`` group in Linux is used to grant specific users administrative privileges without requiring them to log in as the root user. Members of the sudo group can execute commands with elevated privileges by preceding them with the sudo command.
+
+Membership in this group is a safer alternative to using the root account directly, as it requires users to authenticate with their own password and records their actions.
+
+``sudo`` commands stands for "superuser do." It allows a permitted user to execute a command as another user (default is root) without needing the root password.
+
+sudo requires the user to authenticate using their own password instead of the target user's password.
+
+Run almost any commands with sudo: 
+
+```sh
+sudo <command>
+```
+
+### Add an sudo rights to an user
+
+``cat /etc/group | grep sudo`` checks current users in the group
+
+``sudo usermod -aG sudo username`` adds the user to the group
+
+``groups username`` checks the groups that user currently in
+
+### su command
+
+Purpose: Stands for "substitute user" or "switch user." It allows you to switch to another user account, most commonly the root user.
+
+How It Works: When using su, you will be prompted to enter the password of the target user. This means if you're switching to root, you need to know the root password.
+
+Switch to another user account: ``su <username>``
+
+Execute a command as another user: ``su -c "command" <username>``
+
+<a name="filecmd"></a>
+## 15. File commands
+
+### vim command
+
+Vim is a highly powerful and customizable text editor in Linux.
+
+Vim has 3 modes:
+
+**Normal mode:** Vim is a highly powerful and customizable text editor in Linux.
+
+**Insert mode:** Allows text entry (press i to enter Insert mode).
+
+**Command mode:** Used to execute commands (press : to enter Command mode).
+
+Open a file:
+
+```sh
+vim filename
+```
+
+Open multiple file:
+
+```sh
+vim file1 file2
+```
+
+Basic functions inside vim:
+
+``:w`` to save change
+
+``:q`` to quit vim
+
+``:wq`` to save and quit
+
+``:q!`` quit without save
+
+Navigation:
+
+``h / l / k / j`` to move up/right/left/down
+
+``0`` jump to the start of a line
+
+``$`` jump to the end of a line
+
+``gg`` move to the beginning of a file
+
+``G`` move to the end of a file
+
+Text editing:
+
+``x`` deletes a character
+
+``u`` undo change
+
+``Crtl + r`` redo change
+
+``yy`` copy a line
+
+``p`` paste
+
+### cat and echo 
+
+``cat`` Used to display the contents of files, concatenate files, or create new ones.
+
+Basic Syntax: ``cat <file>``
+
+Combine text files: ``cat file1.txt file2.txt > combined.txt``
+
+Create a new file: ``cat newfile.txt``
+
+Display the text files with number of lines: ``cat -n <file>``
+
+
+``echo `` Used to print text or the value of variables to the terminal.
+
+Basic Syntax: ``echo <text>``
+
+Use variables: ``MY_VAR="Learning Linux" `` and ``echo $MY_VAR``
+
+Append text into a file ``echo <text> >> file.txt``
+
+Read permission for a directory allows a user to list the contents of the directory. However, it doesn't necessarily mean the user can access the files within the directory or view their contents additional permissions are required for that.
+
+If a user has read (r) permission for a directory, they can use commands like ``ls`` to view the names of files and subdirectories inside the directory.
+
+To open or interact with files inside a directory, the user also needs execute (x) permission for the directory.
+
+Example: If a directory has read but not execute permission, the user can list the file names but cannot access their contents or navigate into subdirectories.
+
+### Text processing command-line tools
+
+``awk``: Pattern scanning and processing language
+
+Purpose: Extracts and processes text based on patterns and fields (columns).
+
+Typical Use: Parsing structured data like CSVs or log files.
+
+Example:
+```sh
+awk '{print $1}' file.txt  # Prints the first field (column) of each line.
+awk -F, '{print $2}' file.csv  # Uses a comma as a delimiter and prints the second column.
+```
+
+``cut``: Extracts specific sections of text based on delimiters or character positions.
+
+urpose: Extracts specific columns or fields by character or delimiter.
+
+Typical Use: Quick field extraction from simple delimited files.
+
+Example:
+```sh
+cut -d',' -f1 file.csv  # Extracts the first field (column) using a comma delimiter.
+cut -c1-5 file.txt  # Extracts characters 1 through 5 from each line.
+```
+
+``sed``: Stream editor
+
+Purpose: Performs basic text transformations on an input stream (like substitution, deletion, insertion).
+
+Typical Use: Search and replace in files or input.
+
+Example:
+```sh
+sed 's/foo/bar/' file.txt  # Replaces the first occurrence of "foo" with "bar" in each line.
+sed '/pattern/d' file.txt  # Deletes lines matching "pattern".
+```
+
+``grep``: Global regular expression print
+
+Purpose: Searches for patterns (regular expressions) in files.
+
+Typical Use: Filtering lines from text based on pattern matching.
+
+Example:s
+```sh
+grep "error" logfile.txt  # Finds lines containing "error".
+grep -i "info" file.txt  # Case-insensitive search for "info".
+grep -r "keyword" /path  # Recursively searches for "keyword" in all files under `/path`.
+```
+
+### Hardlink and softlink
+
+Hardlink: 
+
+Creates a direct reference to the original file’s data.
+
+Both the hard link and the original file share the same inode number (meaning they point to the same physical data on disk).
+
+Even if the original file is deleted, the data remains accessible via the hard link.
+
+Hard links work only within the same filesystem.
+
+Softlink:
+
+Creates a shortcut to another file.
+
+Soft links have their own inode, separate from the target file.
+
+If the original file is deleted, the soft link becomes broken
+
+Works across different filesystems and can reference directories.
+
+<a name="var"></a>
+## 16. Environment Variables
+
+Environment variables in Linux are used to store information that affects the behavior of the system and applications. They act like placeholders for configuration values and provide flexibility when working with scripts, processes, and the shell.
+
+### Defining Environment Variables
+
+Temporarily Define Variables in a Shell Session:
+
+```sh
+VARIABLE_NAME=value
+export VARIABLE_NAME
+```
+
+Example:
+
+```sh
+export MY_VAR="Hello, Linux World!"
+```
+
+### Define System-Wide Variables: For all users on the system, add variables to /etc/environment or /etc/profile (requires root privileges).
+
+```sh
+sudo nano /etc/environment
+```
+
+Add ``VARIABLE_NAME=value``
+
+### Using Environment Variables
+
+``echo $VARIABLE_NAME`` Access a variable
+
+``cd $HOME`` Use in command
+
+### Listing and Managing Variables
+
+``printenv`` View all variables
+
+``echo $VARIABLE_NAME`` Display 1 variable
+
+``unset VARIABLE_NAME`` Unset a variable
 
 
 
