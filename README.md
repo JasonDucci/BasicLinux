@@ -31,6 +31,9 @@
 15. [File commands](#filecmd)
 
 16. [Environment Variables](#var)
+
+17. [Bash Shell](#bash)
+
 <a name="overview"></a>
 ## 1. Overview
 
@@ -198,6 +201,118 @@ Special purposes serve specific roles like debugging (``debugfs``), temporary st
 12. ``tmp``:
 
 - Temporary files created by the system or users.
+
+### Adding new disk on VMware
+
+1. Add a new disk
+
+Go to storage setting of the virtual machine manager
+
+In the options below press new "hard disk"
+
+Press on "New" to create a new disk
+
+VDI disk type is recommended for OracleVM, choose everything default with disk size set to 2GB
+
+Finish setup and Power up the VM
+
+2. Identify the new disk
+
+After booting, run:
+
+```sh
+lsblk
+```
+
+You’ll see something like:
+
+```sh
+sda      20G
+└─sda1   20G
+sdb       2G  # <-- This is the new disk
+```
+
+3. Partition the disk 
+
+Run:
+
+```sh
+sudo fdisk /dev/sdb
+```
+
+Inside fdisk:
+
+```sh
+n   # new partition
+p   # primary
+1   # partition number
+Enter  # default first sector
+Enter  # default last sector
+w   # write and exit
+```
+
+Verify partition:
+
+```sh
+lsblk
+```
+
+You’ll now see ``/dev/sdb1``.
+
+Format the Partition with a Filesystem:
+
+```sh
+sudo mkfs.ext4 /dev/sdb1
+```
+
+5. Mount the Partition
+
+Create a mount point:
+
+```sh
+sudo mkdir /mnt/data_disk
+```
+
+Mount it:
+
+```sh
+sudo mount /dev/sdb1 /mnt/data_disk
+```
+
+Verify mount:
+
+```sh
+df -h | grep /mnt/data_disk
+```
+
+7. Make the Mount Permanent with /etc/fstab
+Get UUID of the partition:
+
+```sh
+sudo blkid /dev/sdb1
+```
+
+Example output: ``/dev/sdb1: UUID="abcd-1234" TYPE="ext4"``
+
+Edit fstab:
+
+```sh
+sudo nano /etc/fstab
+```
+
+Add this line:
+
+```sh
+UUID=abcd-1234  /mnt/data_disk  ext4  defaults  0 2
+```
+
+Test:
+
+```sh
+sudo umount /mnt/data_disk
+sudo mount -a
+df -h | grep /mnt/data_disk
+```
 
 <a name="treedir"></a>
 ## 5. Linux tree structure of directory
@@ -516,6 +631,50 @@ Access ``/etc/shadow`` using ``sudo vim`` command and change the user password
 
 However, editing passwords directly in ``/etc/shadow`` is not recommended, as it can compromise security.
 
+The /etc/shadow file stores encrypted passwords and looks like this:
+
+```sh
+username:$id$salt$hashedpassword:lastchange:min:max:warn:inactive:expire:
+```
+Example: ``jason:$6$GsQ1UXK3$OqtccFXxK3Ujc5HDV2rD7xC9WdjZmpfknwPq69zRNTzqkjXSGf4vU8YgydJvmuDRT27Ir.LSXYwNFpm2g2vdX/:19430:0:99999:7:::``
+
+``$6$`` = SHA-512
+
+The second field is the hashed password
+
+1. Generate a new hashed password
+
+Use the openssl or mkpasswd command:
+
+```sh
+openssl passwd -6
+```
+
+It will ask for a password, and return something like:
+
+```sh
+$6$random_salt$encrypted_hash_here
+```
+
+Save that output.
+
+2. Open /etc/shadow safely
+
+```sh
+sudo cp /etc/shadow /etc/shadow.bak
+sudo nano /etc/shadow
+```
+
+Find the line for the user, for example: ``jason:$6$oldhashhere:...``
+
+Replace the entire password hash (2nd field) with the one you generated.
+
+3. Save and exit
+In nano: Ctrl + O to save, Ctrl + X to exit.
+
+4. Test the password
+Try logging in as the user (or su - username) and use the new password.
+
 <a name="package"></a>
 ## 9. Package Managers
 
@@ -671,6 +830,72 @@ Then use the apply command again
 
 ```sh 
 sudo ip addr add/del 192.168.1.101/24 dev enp0s3
+```
+
+### VMware network setup
+
+Add a Network card:
+
++ Power off the VM.
+
++ Open VMware Workstation or VMware Player.
+
++ Right-click the VM > Settings.
+
++ Click Add… > Select Network Adapter > Next.
+
++ Choose Custom (to use a specific VMnet) or Bridged/NAT.
+
++ Finish and Power On the VM.
+
++ Run ip link or ip a inside the VM to find the new interface (e.g., ens33, eth1, etc.).
+
+Use command ``ip link`` to find any interface that is currently down
+
+Assuming the interface is ``enp0s8``, manually test the interface:
+
+```sh
+sudo ip link set enp0s8 up
+```
+
+It should now say ``BROADCAST,MULTICAST,UP,LOWER_UP`` — indicating it's active.
+
+To test assigning a static IP without a gateway, run:
+
+```sh
+sudo ip addr add 192.168.100.50/24 dev enp0s8
+```
+
+```sh
+ip a show enp0s8
+```
+Open static IP YAML file:
+
+```sh
+sudo nano /etc/netplan/02-static-ip.yaml
+```
+
+Fix the configure content:
+
+```sh
+network:
+  version: 2
+  ethernets:
+    enp0s8:
+      dhcp4: no
+      addresses:
+        - 192.168.100.50/24
+      nameservers:
+        addresses: [8.8.8.8]
+```
+
+Apply the configuration: ``sudo netplan apply``
+
+Verify the configuration: 
+
+```sh
+ip a show enp0s8 
+ip r
 ```
 <a name="commands"></a>
 ## 13. Command types
@@ -929,7 +1154,80 @@ Add ``VARIABLE_NAME=value``
 
 ``unset VARIABLE_NAME`` Unset a variable
 
+<a name="bash"></a>
+## 17. Bash Shell
 
+Bash stands for Bourne Again SHell. It's one of the most common command-line interpreters used in Linux and macOS systems. You use it to interact with the operating system by typing commands.
 
+### Bash shell script that stores user/pass login to a server, create a key pair, copy the key to that server
 
+1. Prepare a logins.txt file that stores login data
 
+```sh
+user1@192.168.1.100 password123
+user2@server.example.com mysecretpass 
+```
+
+2. Make a script contains the functions
+
+```sh
+#!/bin/bash
+
+# File containing login credentials
+LOGIN_FILE="logins.txt"
+
+# Generate SSH key pair if not exists
+KEY_PATH="$HOME/.ssh/id_rsa"
+if [ ! -f "$KEY_PATH" ]; then
+  echo "[*] Generating SSH key pair..."
+  ssh-keygen -t rsa -b 2048 -f "$KEY_PATH" -N ""
+else
+  echo "[*] SSH key pair already exists."
+fi
+
+# Loop through each line in the login file
+while IFS=' ' read -r userhost password; do
+  echo "[*] Processing $userhost..."
+  
+  # Use sshpass to send the public key to the server
+  sshpass -p "$password" ssh-copy-id -o StrictHostKeyChecking=no "$userhost"
+  
+  if [ $? -eq 0 ]; then
+    echo "[+] Key copied successfully to $userhost"
+  else
+    echo "[!] Failed to copy key to $userhost"
+  fi
+
+done < "$LOGIN_FILE"
+```
+
+Make sure the script is executable then run the script
+
+It will output similar to:
+
+```sh
+[*] Copying key to user1@hostname...
+...
+Number of key(s) added: 1
+...
+[*] Copying key to user2@hostname...
+...
+[*] Copying key to user3@hostname...
+...
+```
+
+Each of those:
+
+Successfully found key at ``~/.ssh/id_rsa.pub``
+
+Copied it to the server via ``ssh-copy-id``
+
+Printed confirmation and a tip on how to test it using ``ssh``
+
+This means:
+
+The ``sshpass`` + ``ssh-copy-id`` combination worked.
+
+The login credentials were accepted.
+
+The key was correctly added.
